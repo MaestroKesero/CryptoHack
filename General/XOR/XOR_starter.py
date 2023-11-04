@@ -14,7 +14,7 @@ def xor_manually():
     print(f"La forma manual de XOR es: ",flag)
     
     
-label = b'label' #Ya esta en bytes, no necesitamos lable.encode('ISO-8859-1')
+label = b'label' #Ya esta en bytes, no necesitamos label.encode('ISO-8859-1')
 number = 13
 
 xor_pwn()
