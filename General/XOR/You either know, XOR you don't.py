@@ -3,8 +3,7 @@ def xor():
     key_part = bytes([byte1 ^ byte2 for byte1,byte2 in zip(flag_enc, flag_format)])
     key = (key_part.decode('ISO-8859-1') + "y").encode('ISO-8859-1')
 
-    print("LA llave es: ",key.decode('ISO-8859-1'))
-    print("Esta es la longitud de la cadena: ",len(key))
+    print("La llave es: ",key.decode('ISO-8859-1'))
 
     for i in range((len(flag_enc) // len(key))):
 
