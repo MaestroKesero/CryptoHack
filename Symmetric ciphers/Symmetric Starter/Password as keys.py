@@ -24,3 +24,5 @@ key = findKey(ciphertext)
 # Por tanto para romper dicho cifrado, necesitamos obtener la clave, para ello realizaremos el proceso inverso
 # y posteriormente tendremos que realizar la operacion XOR entre el ciphertext y la Key (En este caso al utilziar Crypto.Utils.AES directamente
 # podemos utilizar la funcion decrypt del tiron).
+
+# https://blog.csdn.net/shshss64/article/details/128029134
