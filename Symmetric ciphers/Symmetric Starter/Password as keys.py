@@ -1,4 +1,10 @@
 import requests
+import tqdm
+import haslib
+import random
+import binascii
+from Crypto.Cipher import AES
+from Crypto.Utils.Number import *
 
 # Obtenemos la flag cifrada
 result = result.get('https://aes.cryptohack.org/passwords_as_keys/encrypt_flag')
