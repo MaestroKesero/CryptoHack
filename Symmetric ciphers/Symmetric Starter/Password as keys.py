@@ -1,17 +1,21 @@
 import requests
 
-def findKey(ciphertext):
+def findKey(ciphertext_bytex):
 
   with open('/usr/share/dict/words') as f:
     for words in f:
       words = words.strip()
+      key_try_hex = hashlib.md5(word.encode()).digest()
+      key_try_bytes = bytes.fromhex(key_try_hex)
+      print(key_try_bytes)
     
-  return key
+  return key_try_bytes
 
 result = result.get('https://aes.cryptohack.org/passwords_as_keys/encrypt_flag')
 ciphertext = result.json()["ciphertext"]
 print("La flag cifrada es: ", ciphertext)
-key = findKey(ciphertext)
+ciphertext_bytes = bytes.fromhex(ciphertext_hex)
+key = findKey(ciphertext_bytes)
 
 
 # La clave para romper este ECB, es que si observamos el codigo, podemos observar que la Key se genera 
