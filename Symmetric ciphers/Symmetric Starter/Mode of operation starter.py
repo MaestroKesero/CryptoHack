@@ -1,11 +1,11 @@
 import requests
 
-result = result.get('https://aes.cryptohack.org/block_cipher_starter/encrypt_flag')
+result = requests.get('https://aes.cryptohack.org/block_cipher_starter/encrypt_flag')
 ciphertext = result.json()["ciphertext"]
 print("El texto cifrado recibido es: ",ciphertext)
 
-result_message = result_message.get('https://aes.cryptohack.org/block_cipher_starter/decrypt/{ciphertext}')
-flag_hex = flag_hex.json()["plaintext"]
+result_message = requests.get(f'https://aes.cryptohack.org/block_cipher_starter/decrypt/{ciphertext}')
+flag_hex = result_message.json()["plaintext"]
 flag = bytes.fromhex(flag_hex)
 print("La flag es: ", flag)
 
