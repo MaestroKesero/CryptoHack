@@ -43,3 +43,6 @@ with open('/usr/share/dict/words.txt','r') as f:
 # Podemos buscar la flag mediante un grep del archivo o de forma mas sencilla, utilizando if b'crypto{ in flag_try: print(flag_try)
 
 # https://blog.csdn.net/shshss64/article/details/128029134
+
+# Buscamos en el fichero y encontramos: Posible flag: b'crypto{k3y5__r__n07__p455w0rdz?}', llave utilizada: d3e23f1eb6e79ed51133e0da48e98d4a (linea 26931)
+# Por mera curiosidad, para encontrar la palabra de la cual proviene dicho hash_key, hacemos un decript online de dicho hash md5 y encontramos: bluebell
