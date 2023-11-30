@@ -1,5 +1,8 @@
-from pwn import xor
+
 N_ROUNDS = 10
+
+key        = b'\xc3,\\\xa6\xb5\x80^\x0c\xdb\x8d\xa5z*\xb6\xfe\\'
+ciphertext = b'\xd1O\x14j\xa4+O\xb6\xa1\xc4\x08B)\x8f\x12\xdd'
 
 s_box = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -47,12 +50,12 @@ def matrix2bytes(matrix):
     """ Converts a 4x4 matrix into a 16-byte array.  """
     return bytes([matrix[i][j] for i in range(4) for j in range(4)])
 
-def sub_bytes(s, sbox=s_box):
+#Funcion cambiada a los apuntes
+def inv_sub_bytes(s, sbox=s_box):
 
-    state_bytes = matrix2bytes(s)
-    substituted_bytes = [sbox[bytes] for bytes in state_bytes]
-
-    return bytes(substituted_bytes)
+    for i in range(len(s)):
+        for j in range(len(s[i])):
+            s[i][j] = (sbox[s[i][j]])
 
 def shift_rows(s):
     s[0][1], s[1][1], s[2][1], s[3][1] = s[1][1], s[2][1], s[3][1], s[0][1]
@@ -87,7 +90,21 @@ def mix_columns(s):
     for i in range(4):
         mix_single_column(s[i])
 
+'''
+def inv_mix_columns(s):
+    # see Sec 4.1.3 in The Design of Rijndael
+    result = [[0] * 4 for _ in range(4)]  # Crear una nueva matriz para almacenar los resultados
+    for i in range(4):
+        u = xtime(xtime(s[i][0] ^ s[i][2]))
+        v = xtime(xtime(s[i][1] ^ s[i][3]))
+        result[i][0] = s[i][0] ^ u
+        result[i][1] = s[i][1] ^ v
+        result[i][2] = s[i][2] ^ u
+        result[i][3] = s[i][3] ^ v
 
+    return result
+
+'''
 def inv_mix_columns(s):
     # see Sec 4.1.3 in The Design of Rijndael
     for i in range(4):
@@ -100,15 +117,14 @@ def inv_mix_columns(s):
 
     mix_columns(s)
 
-
-key        = b'\xc3,\\\xa6\xb5\x80^\x0c\xdb\x8d\xa5z*\xb6\xfe\\'
-ciphertext = b'\xd1O\x14j\xa4+O\xb6\xa1\xc4\x08B)\x8f\x12\xdd'
-
+# Funcion cambiada a como estaba en los apuntes,
+# No funcionaba como en los apuntes debido a que tenemos que iterar parte a parte como esta aqui
 def add_round_key(s, k):
-    state_bytes = matrix2bytes(s)
-    roundKey_bytes = matrix2bytes(k)
-    result_bytes = xor(state_bytes, roundKey_bytes)
-    return result_bytes
+    for i in range(len(s)):
+        for j in range(len(s[i])):
+            s[i][j] = (s[i][j] ^ k[i][j])
+
+xtime = lambda a: (((a << 1) ^ 0x1B) & 0xFF) if (a & 0x80) else (a << 1)
 
 def expand_key(master_key):
     """
@@ -161,25 +177,35 @@ def decrypt(key, ciphertext):
     # Convert ciphertext to state matrix
     state = bytes2matrix(ciphertext)
     # Initial add round key step
-    add_round_key(state, round_keys)
+    add_round_key(state, round_keys[-1])
+
     for i in range(N_ROUNDS - 1, 0, -1):
 
         # 1 invshiftrows
-        state_flag = inv_shift_rows(state)
+        inv_shift_rows(state)
+        
+        # 2 invsubytes
+        inv_sub_bytes(state, inv_s_box)
+
+        # 3 addrounkey
+        add_round_key(state, round_keys[i])
+
+        # 4 invmixcolums
+        inv_mix_columns(state)
         
 
-        # 2 invsubbytes
-        state_flag = sub_bytes(state_flag, sbox=inv_s_box)
-        # 3 addrounkey
-        state_flag = add_round_key(state, round_keys)
-        # 4 invmixcolums
-        state_flag = inv_mix_columns(state_flag)
-        pass # Do round
+    # Run final round (skips the InvMixColumns step)
+    # 1 invshiftrows
+    inv_shift_rows(state)
+        
+    # 2 invsubytes
+    inv_sub_bytes(state, inv_s_box)
 
-        # Run final round (skips the InvMixColumns step)
+    # 3 addrounkey
+    add_round_key(state, round_keys[0])
 
-        # Convert state matrix to plaintext
-        plaintext = ''.join(''.join(row) for row in state_flag)
+    # Convert state matrix to plaintext
+    plaintext = matrix2bytes(state)
 
     return plaintext
 
@@ -187,3 +213,6 @@ print(decrypt(key, ciphertext))
 
 
 # Importante consultar esta fuente final: https://github.com/francisrstokes/githublog/blob/main/2022/6/15/rolling-your-own-crypto-aes.md
+
+# El problema principal por el que no funcionaba antes de cambiarlo era por que no estaba teniendo en cuenta round_keys[i]
+# y tanto en sub_bytes como en add_round_keys, no estaba teniendo en cuenta las transformaciones parciales
