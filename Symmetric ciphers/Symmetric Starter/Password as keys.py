@@ -46,3 +46,4 @@ with open('/usr/share/dict/words.txt','r') as f:
 
 # Buscamos en el fichero y encontramos: Posible flag: b'crypto{k3y5__r__n07__p455w0rdz?}', llave utilizada: d3e23f1eb6e79ed51133e0da48e98d4a (linea 26931)
 # Por mera curiosidad, para encontrar la palabra de la cual proviene dicho hash_key, hacemos un decript online de dicho hash md5 y encontramos: bluebell
+# Tardo en hacer 40000 posibles flags unas 2 horas 5 min.
